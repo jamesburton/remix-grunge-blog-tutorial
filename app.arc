@@ -1,6 +1,9 @@
 @app
 blog-tutorial-5e99
 
+@aws
+region eu-west-2
+
 @http
 /*
   method any
