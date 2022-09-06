@@ -3,6 +3,7 @@ blog-tutorial-5e99
 
 @aws
 region eu-west-2
+profile default
 
 @http
 /*
