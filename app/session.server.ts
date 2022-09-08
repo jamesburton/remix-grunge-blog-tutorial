@@ -18,6 +18,7 @@ export const sessionStorage = createCookieSessionStorage({
 });
 
 const USER_SESSION_KEY = "userId";
+const USER_ADMIN_KEY = "groks42";
 
 export async function getSession(request: Request) {
   const cookie = request.headers.get("Cookie");
@@ -30,6 +31,14 @@ export async function getUserId(
   const session = await getSession(request);
   const userId = session.get(USER_SESSION_KEY);
   return userId;
+}
+
+export async function getAdmin(
+  request: Request
+): Promise<User["admin"] | undefined> {
+  const session = await getSession(request);
+  const admin = session.get(USER_ADMIN_KEY);
+  return admin;
 }
 
 export async function getUser(request: Request) {
@@ -54,6 +63,19 @@ export async function requireUserId(
   return userId;
 }
 
+export async function requireAdminUserId(
+  request: Request,
+  redirectTo: string = new URL(request.url).pathname
+) {
+  const userId = await getUserId(request);
+  const admin = await getAdmin(request);
+  if (!userId || !admin) {
+    const searchParams = new URLSearchParams([["redirectTo", redirectTo]]);
+    throw redirect(`/login?${searchParams}`);
+  }
+  return userId;
+}
+
 export async function requireUser(request: Request) {
   const userId = await requireUserId(request);
 
@@ -63,19 +85,31 @@ export async function requireUser(request: Request) {
   throw await logout(request);
 }
 
+export async function requireAdminUser(request: Request) {
+  const userId = await requireUserId(request);
+
+  const user = await getUserById(userId);
+  if (user?.admin) return user;
+
+  throw await logout(request);
+}
+
 export async function createUserSession({
   request,
   userId,
   remember,
   redirectTo,
+  admin,
 }: {
   request: Request;
   userId: string;
   remember: boolean;
   redirectTo: string;
+  admin: boolean;
 }) {
   const session = await getSession(request);
   session.set(USER_SESSION_KEY, userId);
+  session.set(USER_ADMIN_KEY, admin);
   return redirect(redirectTo, {
     headers: {
       "Set-Cookie": await sessionStorage.commitSession(session, {

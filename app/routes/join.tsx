@@ -18,10 +18,14 @@ export const loader: LoaderFunction = async ({ request }) => {
   return json({});
 };
 
+// TODO: Enable/Disable as needed to allow/deny admin creation
+const allowCreateAdmin = true;
+
 interface ActionData {
   errors: {
     email?: string;
     password?: string;
+    admin?: boolean;
   };
 }
 
@@ -29,6 +33,7 @@ export const action: ActionFunction = async ({ request }) => {
   const formData = await request.formData();
   const email = formData.get("email");
   const password = formData.get("password");
+  const admin = !!formData.get("admin")?.toString().length;
   const redirectTo = safeRedirect(formData.get("redirectTo"), "/");
 
   if (!validateEmail(email)) {
@@ -60,7 +65,8 @@ export const action: ActionFunction = async ({ request }) => {
     );
   }
 
-  const user = await createUser(email, password);
+  // const user = await createUser(email, password);
+  const user = await createUser(email, password, admin);
 
   return createUserSession({
     request,
@@ -82,6 +88,7 @@ export default function Join() {
   const actionData = useActionData() as ActionData;
   const emailRef = React.useRef<HTMLInputElement>(null);
   const passwordRef = React.useRef<HTMLInputElement>(null);
+  const adminRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
     if (actionData?.errors?.email) {
@@ -148,6 +155,34 @@ export default function Join() {
               )}
             </div>
           </div>
+
+          {!allowCreateAdmin ? null : <>
+            <div>
+              <label
+                htmlFor="admin"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Password
+              </label>
+              <div className="mt-1">
+                <input
+                  id="admin"
+                  ref={adminRef}
+                  name="admin"
+                  type="checkbox"
+                  // autoComplete="new-password"
+                  aria-invalid={actionData?.errors?.admin ? true : undefined}
+                  aria-describedby="admin-error"
+                  className="w-full rounded border border-gray-500 px-2 py-1 text-lg"
+                />
+                {actionData?.errors?.admin && (
+                  <div className="pt-1 text-red-700" id="admin-error">
+                    {actionData.errors.admin}
+                  </div>
+                )}
+              </div>
+            </div>
+          </>}
 
           <input type="hidden" name="redirectTo" value={redirectTo} />
           <button

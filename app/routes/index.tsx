@@ -7,6 +7,12 @@ export default function Index() {
   return (
     <main className="relative min-h-screen bg-white sm:flex sm:items-center sm:justify-center">
       <div className="relative sm:pb-16 sm:pt-8">
+        {/* <div style={{textAlign: 'right'}}><strong>Admin: </strong><span>{!user ? "N/A" : user.admin.toString()}</span></div> */}
+        {!user?.admin ? null : <>
+          <div style={{textAlign: 'right'}}>
+            <a href="/admin">Go to Admin</a>
+          </div>
+        </>}
         <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="relative shadow-xl sm:overflow-hidden sm:rounded-2xl">
             <div className="absolute inset-0">

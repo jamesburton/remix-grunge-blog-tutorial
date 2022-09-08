@@ -17,8 +17,33 @@ user
   pk *String
 
 password
-  pk *String # userId
+  pk *String  # userId
 
 note
   pk *String  # userId
   sk **String # noteId
+
+network
+  pk *String  # userId
+  sk **String # networkId
+
+coin
+  pk *String  # userId
+  sk **String # coinId
+
+@tables-indexes
+user
+  pk *String
+  email **String
+  name byEmail
+
+coin
+  userId *String
+  token **String
+  name byToken
+
+coin
+  userId *String
+  networkId **String
+  name byNetworkId
+
